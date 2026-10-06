@@ -1,0 +1,24 @@
+{
+  "name": "telehealth-portal-microservices",
+  "version": "1.0.0",
+  "description": "Comprehensive HIPAA-Conscious Healthcare Portal Microservices Architecture",
+  "scripts": {
+    "install:all": "npm.cmd install && cd services/gateway && npm.cmd install && cd ../auth-service && npm.cmd install && cd ../signaling-service && npm.cmd install && cd ../ehr-service && npm.cmd install && cd ../vitals-service && npm.cmd install && cd ../../client && npm.cmd install",
+    "seed": "node services/auth-service/src/seed.js",
+    "seed:all": "node services/auth-service/src/seed.js && node services/ehr-service/src/seed.js && node services/vitals-service/src/seed.js && node services/signaling-service/src/seed.js",
+    "dev": "concurrently -n \"GATEWAY,AUTH,SIGNAL,EHR,VITALS,CLIENT\" -c \"magenta,blue,green,yellow,cyan,red\" \"npm.cmd run dev:gateway\" \"npm.cmd run dev:auth\" \"npm.cmd run dev:signaling\" \"npm.cmd run dev:ehr\" \"npm.cmd run dev:vitals\" \"npm.cmd run dev:client\"",
+    "dev:gateway": "cd services/gateway && npm.cmd run dev",
+    "dev:auth": "cd services/auth-service && npm.cmd run dev",
+    "dev:signaling": "cd services/signaling-service && npm.cmd run dev",
+    "dev:ehr": "cd services/ehr-service && npm.cmd run dev",
+    "dev:vitals": "cd services/vitals-service && npm.cmd run dev",
+    "dev:client": "cd client && npm.cmd run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4",
+    "docx": "^9.8.1"
+  },
+  "dependencies": {
+    "playwright": "^1.63.0"
+  }
+}

@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:8.0
+    container_name: telehealth-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  gateway:
+    build: ./services/gateway
+    container_name: telehealth-gateway
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - AUTH_SERVICE_URL=http://auth-service:5001
+      - SIGNALING_SERVICE_URL=http://signaling-service:5002
+      - EHR_SERVICE_URL=http://ehr-service:5003
+      - VITALS_SERVICE_URL=http://vitals-service:5004
+      - CLIENT_ORIGIN=http://localhost:5173
+    depends_on:
+      - auth-service
+      - signaling-service
+      - ehr-service
+      - vitals-service
+
+  auth-service:
+    build: ./services/auth-service
+    container_name: telehealth-auth
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb://mongodb:27017/telehealth_auth
+      - JWT_SECRET=super_secure_telehealth_jwt_secret_key_32chars_min!
+      - JWT_REFRESH_SECRET=super_secure_telehealth_refresh_secret_key_64chars_min!
+    depends_on:
+      - mongodb
+
+  signaling-service:
+    build: ./services/signaling-service
+    container_name: telehealth-signaling
+    ports:
+      - "5002:5002"
+    environment:
+      - PORT=5002
+      - MONGO_URI=mongodb://mongodb:27017/telehealth_consultations
+      - JWT_SECRET=super_secure_telehealth_jwt_secret_key_32chars_min!
+    depends_on:
+      - mongodb
+
+  ehr-service:
+    build: ./services/ehr-service
+    container_name: telehealth-ehr
+    ports:
+      - "5003:5003"
+    environment:
+      - PORT=5003
+      - MONGO_URI=mongodb://mongodb:27017/telehealth_ehr
+      - JWT_SECRET=super_secure_telehealth_jwt_secret_key_32chars_min!
+      - EHR_MASTER_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    depends_on:
+      - mongodb
+
+  vitals-service:
+    build: ./services/vitals-service
+    container_name: telehealth-vitals
+    ports:
+      - "5004:5004"
+    environment:
+      - PORT=5004
+      - MONGO_URI=mongodb://mongodb:27017/telehealth_vitals
+      - JWT_SECRET=super_secure_telehealth_jwt_secret_key_32chars_min!
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo-data:
